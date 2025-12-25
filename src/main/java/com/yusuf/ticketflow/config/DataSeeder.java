@@ -16,11 +16,11 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // If ticket with ID 1 doesn't exist, create it with 100 stock
-        if (!ticketRepository.existsById(1L)) {
-            Ticket ticket = new Ticket(1L, "Super Bowl Final", 100);
-            ticketRepository.save(ticket);
-            System.out.println("TEST DATA INITIALIZED: Ticket #1 created with 100 stock.");
-        }
+        Ticket ticket = ticketRepository.findById(1L).orElse(new Ticket(1L, "Super Bowl Final", 0));
+        ticket.setStock(100);
+        ticketRepository.save(ticket);
+
+        System.out.println("✅ TEST DATA RESET: Ticket #1 stock set to 100.");
+
     }
 }

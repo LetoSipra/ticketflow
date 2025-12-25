@@ -27,9 +27,9 @@ TicketFlow solves this using a multi-layered locking strategy and fair queuing.
 
 ### Phase 2: The Fortress (Concurrency Control) 🔒
 
-- [ ] Implement Redis Distributed Lock (`SETNX`)
-- [ ] Write Lua Script for atomicity
-- [ ] **Proof:** Run K6 again (Zero Overselling)
+- [x] Implement Redis Distributed Lock (`SETNX`)
+- [x] Write Lua Script for atomicity
+- [x] **Proof:** Run K6 again (Zero Overselling)
 
 ### Phase 3: The Bouncer (Traffic Management) 🚦
 
