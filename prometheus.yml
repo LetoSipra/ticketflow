@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s # Scrape every 5 seconds (High resolution for demos)
+
+scrape_configs:
+  - job_name: "ticketflow-app"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["host.docker.internal:8080"] # Points to your Java App running on host

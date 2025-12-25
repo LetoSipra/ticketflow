@@ -5,6 +5,8 @@ export const options = {
   stages: [
     { duration: "5s", target: 100 }, // Ramp up to 100 users
     { duration: "10s", target: 100 }, // Stay at 100 users
+    { duration: "10s", target: 500 }, // Spike to 500 users
+    { duration: "10s", target: 100 }, // Back to 100 users
     { duration: "5s", target: 0 }, // Cool down
   ],
 };

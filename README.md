@@ -14,7 +14,8 @@ TicketFlow solves this using a multi-layered locking strategy and fair queuing.
 - **Database:** PostgreSQL (Optimistic Locking)
 - **Concurrency:** Redis (Distributed Locks + Lua Scripts)
 - **Queueing:** Kafka (Async Notifications)
-- **Traffic Control:** Redis Sorted Sets (Token Bucket Algorithm)
+- **Traffic Control:** Redis Sorted Sets (Virtual Waiting Room)
+- **Observability:** Prometheus & Grafana (Real-time Latency & Lag Monitoring)
 - **Testing:** K6 (Load Testing), Testcontainers
 
 ## 🗺️ Implementation Roadmap
@@ -34,10 +35,10 @@ TicketFlow solves this using a multi-layered locking strategy and fair queuing.
 ### Phase 3: The Bouncer (Traffic Management) 🚦
 
 - [x] Implement Virtual Waiting Room (Redis ZSET)
-- [x] Implement Token Bucket Rate Limiter
+- [x] Enforce FIFO (First-In-First-Out) Queue Logic
 - [x] **Proof:** Handle 5k req/sec with constant DB load
 
 ### Phase 4: The Clean Up (Reliability) 🧹
 
-- [~] ~~Add Scheduler for expired lock cleanup~~ (Handled via Redis Native Expiration)
 - [x] Decouple Email Service using Kafka Events
+- [x] Implement Observability Dashboards (Throughput vs. Lag)

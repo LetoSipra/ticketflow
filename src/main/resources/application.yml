@@ -38,8 +38,23 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       group-id: ticket-group
+      #max-poll-records: 1
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         "[spring.json.trusted.packages]": "*"
+
+# --- MONITORING CONFIG ---
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  metrics:
+    tags:
+      application: ticketflow
+    distribution:
+      percentiles-histogram:
+        # FIX: Escape the key so it treats "http.server.requests" as one string
+        "[http.server.requests]": true

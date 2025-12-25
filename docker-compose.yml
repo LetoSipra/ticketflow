@@ -38,5 +38,27 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
+  # 4. Metrics Collector
+  prometheus:
+    image: prom/prometheus:v2.44.0
+    container_name: ticketflow-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml # We will create this file next
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+  # 5. Visualization Dashboard
+  grafana:
+    image: grafana/grafana:9.5.2
+    container_name: ticketflow-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+
 volumes:
   postgres_data:
