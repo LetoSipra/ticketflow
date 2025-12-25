@@ -10,7 +10,7 @@ TicketFlow solves this using a multi-layered locking strategy and fair queuing.
 
 ## 🛠️ Tech Stack
 
-- **Core:** Java 17, Spring Boot 3.2
+- **Core:** Java 17, Spring Boot 3.5.9
 - **Database:** PostgreSQL (Optimistic Locking)
 - **Concurrency:** Redis (Distributed Locks + Lua Scripts)
 - **Queueing:** Kafka (Async Notifications)
