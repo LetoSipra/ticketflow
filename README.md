@@ -23,7 +23,7 @@ TicketFlow solves this using a multi-layered locking strategy and fair queuing.
 
 - [x] Setup Project Infrastructure (Docker, Spring Boot)
 - [x] Implement Basic `POST /book` (Unsafe)
-- [ ] **Proof:** Crash the system with K6 (Overselling)
+- [x] **Proof:** Crash the system with K6 (Overselling)
 
 ### Phase 2: The Fortress (Concurrency Control) 🔒
 
