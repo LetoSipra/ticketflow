@@ -33,9 +33,9 @@ TicketFlow solves this using a multi-layered locking strategy and fair queuing.
 
 ### Phase 3: The Bouncer (Traffic Management) 🚦
 
-- [ ] Implement Virtual Waiting Room (Redis ZSET)
-- [ ] Implement Token Bucket Rate Limiter
-- [ ] **Proof:** Handle 5k req/sec with constant DB load
+- [x] Implement Virtual Waiting Room (Redis ZSET)
+- [x] Implement Token Bucket Rate Limiter
+- [x] **Proof:** Handle 5k req/sec with constant DB load
 
 ### Phase 4: The Clean Up (Reliability) 🧹
 

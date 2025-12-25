@@ -3,7 +3,7 @@ package com.yusuf.ticketflow.service;
 import com.yusuf.ticketflow.entity.Ticket;
 import com.yusuf.ticketflow.repository.TicketRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+//import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 

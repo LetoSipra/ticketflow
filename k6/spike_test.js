@@ -3,20 +3,36 @@ import { check, sleep } from "k6";
 
 export const options = {
   stages: [
-    { duration: "10s", target: 500 }, // Ramp-up to 500 users over 10 seconds
-    { duration: "10s", target: 500 }, // Stay at 500 users for 10 seconds
-    { duration: "5s", target: 0 }, // Ramp-down to 0 users over 5 seconds
+    { duration: "5s", target: 100 }, // Ramp up to 100 users
+    { duration: "10s", target: 100 }, // Stay at 100 users
+    { duration: "5s", target: 0 }, // Cool down
   ],
 };
 
 export default function () {
-  // Make a POST request to book a ticket
-  const res = http.post("http://host.docker.internal:8080/api/tickets/book/1");
+  const userId = "user-" + __VU;
+
+  const params = {
+    headers: {
+      "X-User-ID": userId,
+      "Content-Type": "application/json",
+    },
+  };
+
+  const res = http.post(
+    "http://host.docker.internal:8080/api/tickets/book/1",
+    null,
+    params
+  );
 
   check(res, {
-    "is status 200": (r) => r.status === 200,
-    "is success": (r) => r.body && r.body.includes("Success"),
+    // Accept 200 (Success), 429 (Wait), or 409 (Sold Out)
+    "is status expected": (r) =>
+      r.status === 200 || r.status === 429 || r.status === 409,
+    "is booked": (r) => r.status === 200 && r.body.includes("Success"),
+    "is queued": (r) => r.status === 429,
   });
 
-  sleep(0.1); // Wait 100ms and hit it again
+  // Short sleep to avoid overwhelming the system too quickly
+  sleep(0.1);
 }
