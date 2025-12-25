@@ -1,51 +1,64 @@
 package com.yusuf.ticketflow.service;
 
+import com.yusuf.ticketflow.dto.TicketConfirmationEvent;
 import com.yusuf.ticketflow.entity.Ticket;
 import com.yusuf.ticketflow.repository.TicketRepository;
 import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
-
 import java.util.UUID;
 
 @Service
 public class BookingService {
 
     private final TicketRepository ticketRepository;
-    private final RedisLockService redisLockService; // Redis Service
+    private final RedisLockService redisLockService;
+    private final NotificationProducer notificationProducer;
 
-    public BookingService(TicketRepository ticketRepository, RedisLockService redisLockService) {
+    public BookingService(TicketRepository ticketRepository,
+            RedisLockService redisLockService,
+            NotificationProducer notificationProducer) {
         this.ticketRepository = ticketRepository;
         this.redisLockService = redisLockService;
+        this.notificationProducer = notificationProducer;
     }
 
-    // @Transactional
     public String bookTicket(Long ticketId) {
-        // 2. Define a unique Lock Key
         String lockKey = "lock:ticket:" + ticketId;
-        String requestId = UUID.randomUUID().toString(); // My unique ID
+        String requestId = UUID.randomUUID().toString();
 
         try {
-            // 3. Try to acquire the lock (Wait 0ms, expire in 10s)
+            // Acquire Lock
             boolean acquired = redisLockService.acquireLock(lockKey, requestId, 10000);
-
             if (!acquired) {
-                return "Failed: System busy, please try again."; // Lock contention
+                return "Failed: System busy, please try again.";
             }
 
-            // 4. CRITICAL SECTION (Safe Zone)
+            // CRITICAL SECTION
             Ticket ticket = ticketRepository.findById(ticketId)
                     .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
             if (ticket.getStock() > 0) {
+                // A. Update DB
                 ticket.setStock(ticket.getStock() - 1);
                 ticketRepository.save(ticket);
-                return "Success! Ticket booked.";
+
+                // B. FIRE KAFKA EVENT (The New Part)
+                // We simulate a user email for demonstration purposes/testing.
+                TicketConfirmationEvent event = new TicketConfirmationEvent(
+                        "user-" + requestId + "@example.com", // Mock email
+                        ticketId.toString(), // Ticket ID
+                        "The Big Concert", // Event Name
+                        99.99 // Price
+                );
+
+                notificationProducer.sendTicketConfirmation(event);
+
+                return "Success! Ticket booked. Email sent.";
             } else {
                 return "Failed: Sold out!";
             }
 
         } finally {
-            // 5. Always release the lock!
+            // Release Lock
             redisLockService.releaseLock(lockKey, requestId);
         }
     }

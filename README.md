@@ -39,5 +39,5 @@ TicketFlow solves this using a multi-layered locking strategy and fair queuing.
 
 ### Phase 4: The Clean Up (Reliability) 🧹
 
-- [ ] Add Scheduler for expired lock cleanup
-- [ ] Decouple Email Service using Kafka Events
+- [~] ~~Add Scheduler for expired lock cleanup~~ (Handled via Redis Native Expiration)
+- [x] Decouple Email Service using Kafka Events
