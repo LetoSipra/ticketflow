@@ -36,7 +36,7 @@ TicketFlow solves this using a multi-layered locking strategy and fair queuing.
 
 - [x] Implement Virtual Waiting Room (Redis ZSET)
 - [x] Enforce FIFO (First-In-First-Out) Queue Logic
-- [x] **Proof:** Handle 1k+ req/sec with constant DB load
+- [x] **Proof:** Handle 5k+ req/sec with constant DB load
 
 ### Phase 4: The Clean Up (Reliability) 🧹
 

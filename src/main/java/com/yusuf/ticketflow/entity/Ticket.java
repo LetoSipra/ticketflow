@@ -3,6 +3,7 @@ package com.yusuf.ticketflow.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "tickets")
@@ -13,18 +14,20 @@ public class Ticket {
     private String name;
     private int stock;
 
-    // 1. Empty Constructor
+    @Version
+    private Integer version;
+
     public Ticket() {
     }
 
-    // 2. Full Constructor (Used in DataSeeder)
     public Ticket(Long id, String name, int stock) {
         this.id = id;
         this.name = name;
         this.stock = stock;
     }
 
-    // 3. Getters and Setters for all fields
+    // --- Getters and Setters ---
+
     public Long getId() {
         return id;
     }
@@ -47,5 +50,13 @@ public class Ticket {
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

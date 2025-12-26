@@ -6,6 +6,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Component
 public class DataSeeder implements CommandLineRunner {
 
@@ -19,14 +21,18 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 2. Clear the Redis Queue
-        redisTemplate.delete("queue:ticket:1");
+        // 1. Clear ALL Redis data to ensure a clean slate
+        // (Includes Locks, Queues, SoldOut Flags, Idempotency Keys)
+        Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection().serverCommands().flushDb();
 
-        // 3. Reset the Ticket Stock
-        Ticket ticket = ticketRepository.findById(1L).orElse(new Ticket(1L, "Super Bowl Final", 0));
+        // 2. Reset the Ticket Stock for the "Hardcore" Test
+        // Using ID 1 explicitly so K6 can find it.
+        Ticket ticket = ticketRepository.findById(1L).orElse(new Ticket());
+        ticket.setId(1L);
+        ticket.setName("Super Bowl Final");
         ticket.setStock(100);
         ticketRepository.save(ticket);
 
-        System.out.println("TEST DATA RESET: Queue cleared & Stock set to 100.");
+        System.out.println("✅ DATA SEEDER: Redis Flushed. Stock set to 100. Ready for K6!");
     }
 }
