@@ -1,5 +1,7 @@
 package com.yusuf.ticketflow.service;
 
+import java.time.Duration;
+
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,9 @@ public class WaitingRoomService {
 
         // 2. Find their rank in the queue
         Long rank = redisTemplate.opsForZSet().rank(queueKey, userId);
+
+        // Reset TTL to 1 hour on each access to keep active users in the queue
+        redisTemplate.expire(queueKey, Duration.ofHours(1));
 
         // 3. If Rank is within BATCH_SIZE, allow to proceed
         return rank != null && rank < BATCH_SIZE;

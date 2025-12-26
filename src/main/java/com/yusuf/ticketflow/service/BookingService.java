@@ -34,49 +34,51 @@ public class BookingService {
 
         // 1. IDEMPOTENCY CHECK
         if (Boolean.TRUE.equals(redisTemplate.hasKey(idempotencyKey))) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "You already booked this! Check your email.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You already booked this!");
         }
 
         // 2. ACQUIRE LOCK
         boolean acquired = redisLockService.acquireLock(lockKey, requestId, 10000);
-
         if (!acquired) {
-            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "System busy, please try again.");
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "System busy");
         }
 
         try {
-            // CRITICAL SECTION
+            // --- CRITICAL SECTION START ---
+
+            // 3. READ DB STATE
             Ticket ticket = ticketRepository.findById(ticketId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
 
-            // 3. SOLD OUT CHECK
+            // 4. CHECK STOCK
             if (ticket.getStock() <= 0) {
-                // CRITICAL: Set the flag so the Controller can block future requests faster
                 redisTemplate.opsForValue().set("ticket:" + ticketId + ":sold_out", "true");
-
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Failed: Sold out!");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Sold out!");
             }
 
-            // 4. Update DB (Stock is guaranteed > 0 here)
+            // 5. UPDATE STOCK
             ticket.setStock(ticket.getStock() - 1);
+
+            // 6. COMMIT TO DB
             ticketRepository.save(ticket);
 
-            // 5. Fire Kafka Event
-            TicketConfirmationEvent event = new TicketConfirmationEvent(
-                    "user-" + requestId + "@example.com",
-                    ticketId.toString(),
-                    "The Big Concert",
-                    99.99);
-            notificationProducer.sendTicketConfirmation(event);
-
-            // 6. SAVE IDEMPOTENCY KEY
-            redisTemplate.opsForValue().set(idempotencyKey, "BOOKED", Duration.ofMinutes(10));
-
-            return "Success! Ticket booked. Email sent.";
+            // --- CRITICAL SECTION END ---
 
         } finally {
-            // Release Lock
+            // 7. RELEASE LOCK (Only AFTER the DB save is 100% done)
             redisLockService.releaseLock(lockKey, requestId);
         }
+        // 8. SEND NOTIFICATION ASYNC
+        TicketConfirmationEvent event = new TicketConfirmationEvent(
+                "user-" + requestId + "@example.com",
+                ticketId.toString(),
+                "The Big Concert",
+                99.99);
+        notificationProducer.sendTicketConfirmation(event);
+
+        // 9. IDEMPOTENCY
+        redisTemplate.opsForValue().set(idempotencyKey, "BOOKED", Duration.ofMinutes(10));
+
+        return "Success! Ticket booked.";
     }
 }
